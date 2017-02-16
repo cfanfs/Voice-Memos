@@ -1,0 +1,29 @@
+/* 
+  Localizable.strings
+  VoiceMemos
+
+  Created by testadm on 2017/2/16.
+  Copyright © 2017年 Yunfan Cui. All rights reserved.
+*/
+
+"vmam_empty_url" = "没有可播放的文件。";
+"vmam_player_failed" = "无法播放录音。";
+"vmam_record_failed" = "录音机无法正常工作。";
+"vmam_short_record" = "录音时间过短";
+
+"vmrdm_invalid_record_name" = "录音名称无效";
+"vmrdm_saving_record_failed" = "保存录音失败！";
+"vmrdm_removing_record_failed" = "删除失败";
+
+"glb_permission_denied" = "无法访问";
+"glb_request_mic_access" = "Voice Memos 需要访问您的麦克风. 请到\"设置\"中允许 Voice Memos 访问麦克风。";
+"glb_cancel" = "取消";
+"glb_setting" = "设置";
+"glb_hold_to_record" = "按住按钮录音";
+"glb_save_record" = "保存录音";
+"glb_save_hint" = "请输入您的录音名称。";
+"glb_delete" = "删除";
+"glb_save" = "保存";
+"glb_err" = "错误";
+"glb_unknown_err" = "未知错误";
+"glb_confirm_to_delete" = "确定要删除这条录音？";

@@ -1,0 +1,29 @@
+/* 
+  Localizable.strings
+  VoiceMemos
+
+  Created by testadm on 2017/2/16.
+  Copyright © 2017年 Yunfan Cui. All rights reserved.
+*/
+
+"vmam_empty_url" = "No file to play.";
+"vmam_player_failed" = "Player cannot play the record.";
+"vmam_record_failed" = "Recorder is not working correctly.";
+"vmam_short_record" = "The record is too short.";
+
+"vmrdm_invalid_record_name" = "Invalid record name.";
+"vmrdm_saving_record_failed" = "Cannot save the record!";
+"vmrdm_removing_record_failed" = "Failed to delete the record.";
+
+"glb_permission_denied" = "Permission Denied";
+"glb_request_mic_access" = "Voice Memos needs access to microphone. Go to \"Settings\" to allow Voice Memos to use your microphone.";
+"glb_cancel" = "Cancel";
+"glb_setting" = "Settings";
+"glb_hold_to_record" = "Hold to record.";
+"glb_save_record" = "Save Record";
+"glb_save_hint" = "Please input your record name.";
+"glb_delete" = "Delete";
+"glb_save" = "Save";
+"glb_err" = "Error";
+"glb_unknown_err" = "Unknown error occured";
+"glb_confirm_to_delete" = "Are you sure you want to delete the record?";

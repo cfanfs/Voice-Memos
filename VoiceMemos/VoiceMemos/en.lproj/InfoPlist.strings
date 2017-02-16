@@ -1,0 +1,9 @@
+/* 
+  InfoPlist.strings
+  VoiceMemos
+
+  Created by testadm on 2017/2/15.
+  Copyright © 2017年 Yunfan Cui. All rights reserved.
+*/
+
+"NSMicrophoneUsageDescription" = "Voice Memos needs to access the microphone to create records.";
