@@ -114,6 +114,11 @@ extension VMRecordingViewController {
         if maxDuration > 0.0 {
             recordingButton.progress = CGFloat(currentTime / maxDuration)
             timeLabel.text = VMUtils.timeString(forInterval: maxDuration - currentTime)
+            if currentTime >= maxDuration {
+                // AVAudioRecorder.record(forDuration:) calls delegate's audioRecorderDidFinishRecording(_:, successfully:) function about 2-3 seconds after recording actually finished. 
+                // Manually stop recording here
+                VMAudioManager.shared.stopRecording()
+            }
         } else {
             timeLabel.text = VMUtils.timeString(forInterval: currentTime)
         }
