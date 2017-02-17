@@ -72,7 +72,8 @@ final class VMAudioManager:NSObject {
     
     fileprivate func resetAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+            try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
         } catch {
             VMUtils.log("Reset Audio Session Failed:\n\(error)")
         }
@@ -112,6 +113,7 @@ final class VMAudioManager:NSObject {
     func stopPlaying() {
         if state == .playing {
             player?.stop()
+            stopObservingProximitySensor()
             resetState()
         }
     }
@@ -179,6 +181,7 @@ fileprivate extension VMAudioManager {
         }
         
         state = .playing
+        startObservingProximitySensor()
         NotificationCenter.default.post(
             name: Notification.Name.VMAudioManagerDidStartPlaying,
             object: nil,
@@ -226,6 +229,7 @@ fileprivate extension VMAudioManager {
 // MARK: - AVAudioPlayerDelegate
 extension VMAudioManager:AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        stopObservingProximitySensor()
         resetState()
     }
     
@@ -363,6 +367,35 @@ extension NSError {
         NSError(domain: VMAudioManagerErrorDomain,
                 code: VMAudioManagerRecordingFailedUnknownErrorCode,
                 userInfo: [NSLocalizedDescriptionKey: NSLocalizedString("vmam_record_failed", comment: "")])
+}
+
+// MARK: - Proximity Sensor Support
+extension VMAudioManager {
+    fileprivate func startObservingProximitySensor() {
+        UIDevice.current.isProximityMonitoringEnabled = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(proximityStateChanged(noti:)),
+            name: .UIDeviceProximityStateDidChange,
+            object: nil)
+    }
+    
+    fileprivate func stopObservingProximitySensor() {
+        UIDevice.current.isProximityMonitoringEnabled = false
+        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        NotificationCenter.default.removeObserver(
+            self,
+            name: .UIDeviceProximityStateDidChange,
+            object: nil)
+    }
+    
+    @objc fileprivate func proximityStateChanged(noti:Notification) {
+        if UIDevice.current.proximityState {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+        } else {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        }
+    }
 }
 
 // MARK: - VMRecord Related Interfaces
