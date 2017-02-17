@@ -9,13 +9,13 @@
 import Foundation
 import CoreData
 
+fileprivate var VMRecordDataManager_spinLock:OSSpinLock = OS_SPINLOCK_INIT
+@available(iOS 10.0, *)
+fileprivate var VMRecordDataManger_unfairLock:os_unfair_lock = os_unfair_lock()
+
 final class VMRecordDataManager {
     static let shared = VMRecordDataManager()
     private var recordContents:[[String: AnyObject]] = []
-    
-    private var spinLock:OSSpinLock = OS_SPINLOCK_INIT
-    @available(iOS 10.0, *)
-    private lazy var unfairLock:os_unfair_lock = os_unfair_lock()
     
     init() {
         loadLocalRecords()
@@ -28,7 +28,7 @@ final class VMRecordDataManager {
     }
     
     var temporaryRecordURL:URL {
-        return URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("vm_temporary_audio")
+        return URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(VMUtils.randomFileName(withExtension: "tmp"))
     }
     
     private func loadLocalRecords() {
@@ -38,7 +38,7 @@ final class VMRecordDataManager {
     }
     
     private func synchronize() -> Bool {
-        let result = (recordContents as NSArray).write(to: recordListFileURL, atomically: true)
+        let result = (recordContents as NSArray).write(to: recordListFileURL, atomically: false)
         if !result {
             VMUtils.log("Can not synchronize record list file.")
         }
@@ -47,17 +47,17 @@ final class VMRecordDataManager {
     
     private func lock() {
         if #available(iOS 10.0, *) {
-            os_unfair_lock_lock(&unfairLock)
+            os_unfair_lock_lock(&VMRecordDataManger_unfairLock)
         } else {
-            OSSpinLockLock(&spinLock)
+            OSSpinLockLock(&VMRecordDataManager_spinLock)
         }
     }
     
     private func unlock() {
         if #available(iOS 10.0, *) {
-            os_unfair_lock_unlock(&unfairLock)
+            os_unfair_lock_unlock(&VMRecordDataManger_unfairLock)
         } else {
-            OSSpinLockUnlock(&spinLock)
+            OSSpinLockUnlock(&VMRecordDataManager_spinLock)
         }
     }
     
@@ -65,11 +65,11 @@ final class VMRecordDataManager {
         lock()
         do {
             try closure()
+            unlock()
         } catch {
             unlock()
             throw error
         }
-        unlock()
     }
     
     // Interfaces
@@ -82,12 +82,11 @@ final class VMRecordDataManager {
         return output
     }
     
-    func createRecord(fileURL:URL? = nil, name:String, fileExtension:String) throws -> VMRecord? {
+    func createRecord(sourceURL:URL, name:String, fileExtension:String) throws -> VMRecord? {
         if name.characters.count == 0 {
             throw NSError.VMRecordDataManagerInvalidRecordName
         }
         
-        let sourceURL = fileURL ?? temporaryRecordURL
         let fileManager = FileManager.default
         if !fileManager.fileExists(atPath: sourceURL.path) {
             VMUtils.log("Record source file not exist")
@@ -116,23 +115,20 @@ final class VMRecordDataManager {
         }
         
         let record = VMRecord(name:name, fileName:fileName, createTime:Date())
-        do {
-            try sync {
-                do {
-                    try fileManager.moveItem(at: sourceURL, to: targetURL)
-                } catch {
-                    VMUtils.log("Move failed:\n\(error)")
-                    throw NSError.VMRecordDataManagerUnableToSaveNewRecord
-                }
-                recordContents.append(record.dictionary)
-                if !synchronize() {
-                    recordContents.removeLast()
-                    VMUtils.log("Uable to write back record list file.")
-                    throw NSError.VMRecordDataManagerUnableToSaveNewRecord
-                }
+
+        try sync {
+            do {
+                try fileManager.moveItem(at: sourceURL, to: targetURL)
+            } catch {
+                VMUtils.log("Move failed:\n\(error)")
+                throw NSError.VMRecordDataManagerUnableToSaveNewRecord
             }
-        } catch {
-            throw error
+            recordContents.append(record.dictionary)
+            if !synchronize() {
+                recordContents.removeLast()
+                VMUtils.log("Uable to write back record list file.")
+                throw NSError.VMRecordDataManagerUnableToSaveNewRecord
+            }
         }
         
         return record
@@ -162,11 +158,11 @@ final class VMRecordDataManager {
         return true
     }
     
-    func removeTemporaryRecord() {
+    func removeTemporaryFile(at url:URL) {
         sync {
             let fileManager = FileManager.default
             do {
-                try fileManager.removeItem(at: temporaryRecordURL)
+                try fileManager.removeItem(at: url)
             } catch {
                 VMUtils.log("Remove temporary record failed:\n\(error)")
             }

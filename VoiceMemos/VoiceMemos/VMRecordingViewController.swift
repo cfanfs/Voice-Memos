@@ -17,6 +17,7 @@ class VMRecordingViewController: UIViewController {
     
     fileprivate let audioFormat = VMAudioManager.AudioFormat.mpeg4acc
     fileprivate var recordTimer:Timer?
+    fileprivate var temporaryRecordFileURL:URL?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,11 +72,13 @@ extension VMRecordingViewController {
     
     private func startRecording() {
         do {
-            let result = try VMAudioManager.shared.startRecording(url: VMRecordDataManager.shared.temporaryRecordURL, format: audioFormat)
+            let url = VMRecordDataManager.shared.temporaryRecordURL
+            let result = try VMAudioManager.shared.startRecording(url: url, format: audioFormat)
             recordingButton.recordDurationLimit = VMAudioManager.shared.maximumRecordDuration
             recordingButton.isRecording = result
             timeLabel.isHidden = false
             startTimer()
+            temporaryRecordFileURL = url
         } catch {
             showErrorMessage(message: error.localizedDescription)
         }
@@ -85,6 +88,7 @@ extension VMRecordingViewController {
         recordingButton.isRecording = false
         timeLabel.isHidden = true
         endTimer()
+        timeLabel.text = nil
     }
     
     private func startTimer() {
@@ -128,8 +132,11 @@ extension VMRecordingViewController {
         
         let deleteAction = UIAlertAction(
             title: NSLocalizedString("glb_delete", comment: ""),
-            style: .destructive) { _ in
-                VMRecordDataManager.shared.removeTemporaryRecord()
+            style: .destructive) { [weak self] _ in
+                if let url = self?.temporaryRecordFileURL {
+                    VMRecordDataManager.shared.removeTemporaryFile(at: url)
+                }
+                self?.temporaryRecordFileURL = nil
         }
         alertController.addAction(deleteAction)
         
@@ -146,7 +153,12 @@ extension VMRecordingViewController {
     private func createNewRecord(_ sender:UITextField) {
         if let name = sender.text {
             do {
-                let _ = try VMRecordDataManager.shared.createRecord(name: name, fileExtension: audioFormat.fileExtension)
+                guard let url = temporaryRecordFileURL else {
+                    VMUtils.log("\"temporaryRecordFileURL\" is not setted before used.")
+                    abort()
+                }
+                let _ = try VMRecordDataManager.shared.createRecord(sourceURL: url, name: name, fileExtension: audioFormat.fileExtension)
+                temporaryRecordFileURL = nil
             } catch {
                 switch error as NSError {
                 case NSError.VMRecordDataManagerInvalidRecordName:
@@ -158,8 +170,9 @@ extension VMRecordingViewController {
                             self.getRecordName()
                     }
                 default:
-                    self.showErrorMessage(message: error.localizedDescription)
+                    showErrorMessage(message: error.localizedDescription)
                 }
+                temporaryRecordFileURL = nil
             }
         }
     }

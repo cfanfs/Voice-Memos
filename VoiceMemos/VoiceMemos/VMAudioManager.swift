@@ -105,11 +105,7 @@ final class VMAudioManager:NSObject {
     func play(url:URL) throws -> Bool {
         // prepare audiosession
         playingURL = url
-        do {
-            try prepareAndPlay()
-        } catch {
-            throw error
-        }
+        try prepareAndPlay()
         return true
     }
     
@@ -122,11 +118,7 @@ final class VMAudioManager:NSObject {
     
     func startRecording(url:URL, format:AudioFormat) throws -> Bool {
         recordingTargetURL = url
-        do {
-            try prepareAndRecord(format: format)
-        } catch {
-            throw error
-        }
+        try prepareAndRecord(format: format)
         return true
     }
     
@@ -174,24 +166,23 @@ fileprivate extension VMAudioManager {
         guard let url = playingURL else {
             throw NSError.VMAudioManagerEmptyURL
         }
-        do {
-            try AVAudioSession.sharedInstance().setActive(true)
-            if player?.url != url {
-                try player = AVAudioPlayer(contentsOf: url)
-                player?.delegate = self
-            }
-            if player?.play() == false {
-                throw NSError.VMAudioManagerPlayerUnableToPlay
-            }
-            
-            state = .playing
-            NotificationCenter.default.post(
-                name: Notification.Name.VMAudioManagerDidStartPlaying,
-                object: nil,
-                userInfo: nil)
-        } catch {
-            throw error
+        
+        try AVAudioSession.sharedInstance().setActive(true)
+        if player?.url != url {
+            try player = AVAudioPlayer(contentsOf: url)
+            player?.delegate = self
+        } else {
+            player?.currentTime = 0.0
         }
+        if player?.play() == false {
+            throw NSError.VMAudioManagerPlayerUnableToPlay
+        }
+        
+        state = .playing
+        NotificationCenter.default.post(
+            name: Notification.Name.VMAudioManagerDidStartPlaying,
+            object: nil,
+            userInfo: nil)
     }
     
     func prepareAndRecord(format:AudioFormat) throws {
@@ -199,29 +190,25 @@ fileprivate extension VMAudioManager {
             throw NSError.VMAudioManagerEmptyURL
         }
         
-        do {
-            let audioFormat = AVAudioFormat(standardFormatWithSampleRate: 16000.0, channels: 1)
-            var description = audioFormat.streamDescription.pointee
-            description.mFormatID = format.formatID
-            let finalFormat = AVAudioFormat(streamDescription: &description)
-            
-            if #available(iOS 10.0, *) {
-                try recorder = AVAudioRecorder(url: url, format: finalFormat)
-            } else {
-                try recorder = AVAudioRecorder(url: url, settings: finalFormat.settings)
-            }
-            recorder?.delegate = self
-            if recorder?.prepareToRecord() == false {
-                throw NSError.VMAudioManagerRecorderUnableToRecord
-            }
-            try AVAudioSession.sharedInstance().setActive(true)
-            if recorder?.record(forDuration: maximumRecordDuration) == false {
-                throw NSError.VMAudioManagerRecorderUnableToRecord
-            }
-            state = .recording
-        } catch {
-            throw error
+        let audioFormat = AVAudioFormat(standardFormatWithSampleRate: 16000.0, channels: 1)
+        var description = audioFormat.streamDescription.pointee
+        description.mFormatID = format.formatID
+        let finalFormat = AVAudioFormat(streamDescription: &description)
+        
+        if #available(iOS 10.0, *) {
+            try recorder = AVAudioRecorder(url: url, format: finalFormat)
+        } else {
+            try recorder = AVAudioRecorder(url: url, settings: finalFormat.settings)
         }
+        recorder?.delegate = self
+        if recorder?.prepareToRecord() == false {
+            throw NSError.VMAudioManagerRecorderUnableToRecord
+        }
+        try AVAudioSession.sharedInstance().setActive(true)
+        if recorder?.record(forDuration: maximumRecordDuration) == false {
+            throw NSError.VMAudioManagerRecorderUnableToRecord
+        }
+        state = .recording
     }
     
     func resetState() {
@@ -291,6 +278,8 @@ extension VMAudioManager {
         if interuptionType == AVAudioSessionInterruptionType.began.rawValue {
             hangUpCurrentWork()
         } else {
+            // Keyboard after interruption is not visible but tappable. Delay the execution of the closure may decrease the frequency of the invisibility of the keyboard, but the problem still exists. Increasing the delaying time might solve this problem, but keeping user to wait until the alert and keyboard show up after interuption is unreasonable.
+            // Considering to drop the record before interruption occured.
             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                 self.endCurrentWork()
                 self.resetAudioSession()
@@ -379,11 +368,7 @@ extension NSError {
 // MARK: - VMRecord Related Interfaces
 extension VMAudioManager {
     func playRecord(record:VMRecord) throws -> Bool {
-        do {
-            try _ = play(url: record.recordFileURL)
-        } catch {
-            throw error
-        }
+        try _ = play(url: record.recordFileURL)
         return true
     }
     

@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		57B7710B1E56982D00E0A0B1 /* VMRecordDataManagerConcurrencyTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B7710A1E56982D00E0A0B1 /* VMRecordDataManagerConcurrencyTest.swift */; };
 		57D331A81E5209A2005D4E21 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D331A71E5209A2005D4E21 /* AppDelegate.swift */; };
 		57D331AD1E5209A2005D4E21 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D331AB1E5209A2005D4E21 /* Main.storyboard */; };
 		57D331AF1E5209A2005D4E21 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57D331AE1E5209A2005D4E21 /* Assets.xcassets */; };
 		57D331B21E5209A2005D4E21 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57D331B01E5209A2005D4E21 /* LaunchScreen.storyboard */; };
-		57D331BD1E5209A2005D4E21 /* VoiceMemosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D331BC1E5209A2005D4E21 /* VoiceMemosTests.swift */; };
 		57D331C81E5209A2005D4E21 /* VoiceMemosUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D331C71E5209A2005D4E21 /* VoiceMemosUITests.swift */; };
 		57D331DA1E520A9D005D4E21 /* VMRecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D331D91E520A9D005D4E21 /* VMRecordingButton.swift */; };
 		57D331DC1E521430005D4E21 /* VMRecordingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D331DB1E52142F005D4E21 /* VMRecordingViewController.swift */; };
@@ -42,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		57B7710A1E56982D00E0A0B1 /* VMRecordDataManagerConcurrencyTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VMRecordDataManagerConcurrencyTest.swift; sourceTree = "<group>"; };
 		57D331A41E5209A2005D4E21 /* VoiceMemos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceMemos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D331A71E5209A2005D4E21 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		57D331AC1E5209A2005D4E21 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -49,7 +50,6 @@
 		57D331B11E5209A2005D4E21 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		57D331B31E5209A2005D4E21 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57D331B81E5209A2005D4E21 /* VoiceMemosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceMemosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		57D331BC1E5209A2005D4E21 /* VoiceMemosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemosTests.swift; sourceTree = "<group>"; };
 		57D331BE1E5209A2005D4E21 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57D331C31E5209A2005D4E21 /* VoiceMemosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceMemosUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57D331C71E5209A2005D4E21 /* VoiceMemosUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemosUITests.swift; sourceTree = "<group>"; };
@@ -129,7 +129,7 @@
 		57D331BB1E5209A2005D4E21 /* VoiceMemosTests */ = {
 			isa = PBXGroup;
 			children = (
-				57D331BC1E5209A2005D4E21 /* VoiceMemosTests.swift */,
+				57B7710A1E56982D00E0A0B1 /* VMRecordDataManagerConcurrencyTest.swift */,
 				57D331BE1E5209A2005D4E21 /* Info.plist */,
 			);
 			path = VoiceMemosTests;
@@ -362,7 +362,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57D331BD1E5209A2005D4E21 /* VoiceMemosTests.swift in Sources */,
+				57B7710B1E56982D00E0A0B1 /* VMRecordDataManagerConcurrencyTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
