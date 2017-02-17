@@ -6,4 +6,5 @@
   Copyright © 2017年 Yunfan Cui. All rights reserved.
 */
 
+"CFBundleName" = "语音备忘";
 "NSMicrophoneUsageDescription" = "Voice Memos 需要访问您的麦克风来创建录音。";

@@ -6,4 +6,5 @@
   Copyright © 2017年 Yunfan Cui. All rights reserved.
 */
 
+"CFBundleName" = "Voice M";
 "NSMicrophoneUsageDescription" = "Voice Memos needs to access the microphone to create records.";
