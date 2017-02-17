@@ -95,6 +95,13 @@ final class VMAudioManager:NSObject {
     
     // Play / Record Control
     
+    var currentTimeOfRecorder:TimeInterval {
+        if state == .recording, let currentRecorder = recorder {
+            return currentRecorder.currentTime
+        }
+        return 0
+    }
+    
     func play(url:URL) throws -> Bool {
         // prepare audiosession
         playingURL = url

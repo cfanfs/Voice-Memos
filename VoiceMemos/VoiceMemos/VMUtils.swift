@@ -15,6 +15,19 @@ class VMUtils {
         return [UUID().uuidString, ext].joined(separator: ".")
     }
     
+    class func timeString(forInterval timeInterval:TimeInterval) -> String {
+        let integerInterval = UInt(max(0.0, timeInterval))
+        let hours = integerInterval / 3600
+        let minutes = (integerInterval % 3600) / 60
+        let seconds = integerInterval % 60
+        var components = [String]()
+        if hours > 0 {
+            components.append("\(hours)")
+        }
+        components.append(contentsOf: [minutes, seconds].map{String(format:"%02u", $0)})
+        return components.joined(separator: ":")
+    }
+    
     class func presentSingleButtonAlertController(inViewController viewController:UIViewController, withTitle title:String?, description:String?, buttonTitle:String?, action:(() -> Void)?) {
         let alertController = UIAlertController(title: title, message: description, preferredStyle: .alert)
         let action = UIAlertAction(title: buttonTitle ?? "OK", style: .cancel) { _ in

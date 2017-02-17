@@ -9,12 +9,14 @@
 import UIKit
 import AVFoundation
 
+// MARK: - Basics
 class VMRecordingViewController: UIViewController {
-    
+    @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var recordingButton: VMRecordingButton!
     
     fileprivate let audioFormat = VMAudioManager.AudioFormat.mpeg4acc
+    fileprivate var recordTimer:Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,17 +40,19 @@ class VMRecordingViewController: UIViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self)
+        endTimer()
     }
-    
+}
+
+// MARK: - Recording Control
+extension VMRecordingViewController {
     @IBAction func startRecordingAction(sender:VMRecordingButton) {
         resetMessage()
         let permission = VMAudioManager.shared.microphonePermission()
         switch permission {
         case AVAudioSessionRecordPermission.undetermined:
             VMAudioManager.shared.requestMicrophonePermission{ [weak self] granted in
-                if granted {
-                    self?.startRecording()
-                } else {
+                if !granted {
                     self?.showPermissionDeniedAlert()
                 }
             }
@@ -70,6 +74,8 @@ class VMRecordingViewController: UIViewController {
             let result = try VMAudioManager.shared.startRecording(url: VMRecordDataManager.shared.temporaryRecordURL, format: audioFormat)
             recordingButton.recordDurationLimit = VMAudioManager.shared.maximumRecordDuration
             recordingButton.isRecording = result
+            timeLabel.isHidden = false
+            startTimer()
         } catch {
             showErrorMessage(message: error.localizedDescription)
         }
@@ -77,43 +83,36 @@ class VMRecordingViewController: UIViewController {
     
     fileprivate func endRecording() {
         recordingButton.isRecording = false
+        timeLabel.isHidden = true
+        endTimer()
     }
     
-    private func showPermissionDeniedAlert() {
-        let alertController = UIAlertController(
-            title: NSLocalizedString("glb_permission_denied", comment: ""),
-            message: NSLocalizedString("glb_request_mic_access", comment: ""),
-            preferredStyle: .alert)
-        
-        let cancelAction = UIAlertAction(title: NSLocalizedString("glb_cancel", comment: ""),
-                                         style: .cancel,
-                                         handler: nil)
-        alertController.addAction(cancelAction)
-        
-        let setAction = UIAlertAction(title: NSLocalizedString("glb_setting", comment: ""),
-                                      style: .default) { _ in
-            UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!)
+    private func startTimer() {
+        if recordTimer == nil {
+            recordTimer = Timer.scheduledTimer(
+                timeInterval: 0.2,
+                target: self,
+                selector: #selector(updateRecordingTime(_:)),
+                userInfo: nil,
+                repeats: true)
         }
-        alertController.addAction(setAction)
+    }
+    
+    fileprivate func endTimer() {
+        recordTimer?.invalidate()
+        recordTimer = nil
+    }
+    
+    @objc private func updateRecordingTime(_ timer:Timer) {
+        let currentTime = VMAudioManager.shared.currentTimeOfRecorder
+        let maxDuration = VMAudioManager.shared.maximumRecordDuration
         
-        present(alertController, animated: true, completion: nil)
-    }
-    
-    private func resetMessage() {
-        messageLabel.text = NSLocalizedString("glb_hold_to_record", comment: "")
-        messageLabel.textColor = UIColor.black
-    }
-    
-    fileprivate func showErrorMessage(message:String) {
-        messageLabel.text = message
-        messageLabel.textColor = UIColor.red
-        messageLabel.isHidden = false
-    }
-    
-    fileprivate func showSuccessMessage(message:String) {
-        messageLabel.text = message
-        messageLabel.textColor = UIColor.green
-        messageLabel.isHidden = false
+        if maxDuration > 0.0 {
+            recordingButton.progress = CGFloat(currentTime / maxDuration)
+            timeLabel.text = VMUtils.timeString(forInterval: maxDuration - currentTime)
+        } else {
+            timeLabel.text = VMUtils.timeString(forInterval: currentTime)
+        }
     }
     
     fileprivate func getRecordName() {
@@ -144,7 +143,7 @@ class VMRecordingViewController: UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
-    fileprivate func createNewRecord(_ sender:UITextField) {
+    private func createNewRecord(_ sender:UITextField) {
         if let name = sender.text {
             do {
                 let _ = try VMRecordDataManager.shared.createRecord(name: name, fileExtension: audioFormat.fileExtension)
@@ -164,6 +163,48 @@ class VMRecordingViewController: UIViewController {
             }
         }
     }
+}
+
+// MARK: - Messages
+extension VMRecordingViewController {
+    fileprivate func showPermissionDeniedAlert() {
+        let alertController = UIAlertController(
+            title: NSLocalizedString("glb_permission_denied", comment: ""),
+            message: NSLocalizedString("glb_request_mic_access", comment: ""),
+            preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: NSLocalizedString("glb_cancel", comment: ""),
+                                         style: .cancel,
+                                         handler: nil)
+        alertController.addAction(cancelAction)
+        
+        let setAction = UIAlertAction(title: NSLocalizedString("glb_setting", comment: ""),
+                                      style: .default) { _ in
+            UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!)
+        }
+        alertController.addAction(setAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func resetMessage() {
+        messageLabel.text = NSLocalizedString("glb_hold_to_record", comment: "")
+        messageLabel.textColor = UIColor.black
+    }
+    
+    fileprivate func showErrorMessage(message:String) {
+        messageLabel.text = message
+        messageLabel.textColor = UIColor.red
+        messageLabel.isHidden = false
+    }
+    
+    fileprivate func showSuccessMessage(message:String) {
+        messageLabel.text = message
+        messageLabel.textColor = UIColor.green
+        messageLabel.isHidden = false
+    }
+    
+    
 }
 
 // MARK: - Notifications

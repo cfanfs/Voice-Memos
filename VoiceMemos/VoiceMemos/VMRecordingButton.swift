@@ -16,11 +16,20 @@ class VMRecordingButton: UIControl {
         didSet {
             if isRecording {
                 displayRecording()
-                startCountDownAnimation()
+//                startCountDownAnimation()
             } else {
                 displayIdle()
-                endCountDownAnimation()
+//                endCountDownAnimation()
             }
+        }
+    }
+    var progress:CGFloat {
+        get {
+            return progressCircleLayer.strokeEnd
+        }
+        set {
+            let fixedProgress = min(max(0.0, newValue), 1.0)
+            progressCircleLayer.strokeEnd = fixedProgress
         }
     }
     
@@ -48,6 +57,7 @@ extension VMRecordingButton {
         progressCircleLayer.strokeColor = UIColor.green.cgColor
         progressCircleLayer.strokeStart = 0
         progressCircleLayer.strokeEnd = 0
+        progressCircleLayer.isHidden = true
         layer.addSublayer(progressCircleLayer)
         
         recordBackgroundLayer.fillColor = UIColor.lightGray.cgColor
@@ -89,11 +99,14 @@ extension VMRecordingButton {
     fileprivate func displayRecording() {
         recordingIconLayer.contents = #imageLiteral(resourceName: "record_icon_recording").cgImage
         recordBackgroundLayer.fillColor = UIColor.green.cgColor
+        progressCircleLayer.isHidden = false
     }
     
     fileprivate func displayIdle() {
         recordingIconLayer.contents = #imageLiteral(resourceName: "record_icon").cgImage
         recordBackgroundLayer.fillColor = UIColor.lightGray.cgColor
+        progressCircleLayer.isHidden = true
+        progressCircleLayer.strokeEnd = 0.0
     }
     
     fileprivate func startCountDownAnimation() {

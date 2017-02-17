@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>VMRecordMaximumLength</key>
-	<real>30</real>
+	<integer>0</integer>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>

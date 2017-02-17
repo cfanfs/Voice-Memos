@@ -46,9 +46,15 @@
                                     <action selector="startRecordingActionWithSender:" destination="BYZ-38-t0r" eventType="touchDown" id="07o-SN-j4I"/>
                                 </connections>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mdP-LT-M1V">
-                                <rect key="frame" x="36" y="225.5" width="303" height="24"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mdP-LT-M1V">
+                                <rect key="frame" x="36" y="249.5" width="303" height="0.0"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FJU-UA-5FG">
+                                <rect key="frame" x="187" y="239.5" width="0.0" height="0.0"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="30"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -58,8 +64,10 @@
                             <constraint firstItem="Ube-4f-y8e" firstAttribute="top" secondItem="mdP-LT-M1V" secondAttribute="bottom" constant="20" id="ATi-V1-5eX"/>
                             <constraint firstItem="mdP-LT-M1V" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="Efk-iI-Fp8"/>
                             <constraint firstAttribute="trailingMargin" secondItem="mdP-LT-M1V" secondAttribute="trailing" constant="20" id="MUO-Pw-Yhp"/>
+                            <constraint firstItem="mdP-LT-M1V" firstAttribute="top" secondItem="FJU-UA-5FG" secondAttribute="bottom" constant="10" id="RXc-QR-84I"/>
                             <constraint firstItem="Ube-4f-y8e" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WFb-e4-hjv"/>
                             <constraint firstItem="Ube-4f-y8e" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="eGR-R4-6xD"/>
+                            <constraint firstItem="FJU-UA-5FG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xJK-aO-Sok"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="Q2v-84-Ahn">
@@ -72,6 +80,7 @@
                     <connections>
                         <outlet property="messageLabel" destination="mdP-LT-M1V" id="HVm-6q-wK5"/>
                         <outlet property="recordingButton" destination="Ube-4f-y8e" id="CsN-0X-ECK"/>
+                        <outlet property="timeLabel" destination="FJU-UA-5FG" id="ozN-AY-Uxw"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
