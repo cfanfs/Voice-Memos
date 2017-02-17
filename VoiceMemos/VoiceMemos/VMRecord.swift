@@ -32,6 +32,7 @@ struct VMRecord {
         createTime = dictionary["create_time"] as? Date ?? Date()
     }
     
+    /// Convinent access to record file url
     var recordFileURL:URL {
         return VMRecordDataManager.shared.recordFolderURL.appendingPathComponent(fileName)
     }

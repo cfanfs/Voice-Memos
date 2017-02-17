@@ -21,22 +21,29 @@ final class VMRecordDataManager {
         loadLocalRecords()
     }
     
+    /// File storing references of saved records
     private var recordListFileURL:URL = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Documents/records_list.plist")
     
+    /// Fold containing record audio files
     var recordFolderURL:URL {
         return URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Documents/Record")
     }
     
+    /// Random temporary file for audio recorder
     var temporaryRecordURL:URL {
         return URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(VMUtils.randomFileName(withExtension: "tmp"))
     }
     
+    /// Load records' references from storage
     private func loadLocalRecords() {
         if let content = NSArray(contentsOf: recordListFileURL) as? [[String: AnyObject]] {
             recordContents = content
         }
     }
     
+    /// Write modified records' referecnes back to storage
+    ///
+    /// - Returns: Writing operation succeeded or not
     private func synchronize() -> Bool {
         let result = (recordContents as NSArray).write(to: recordListFileURL, atomically: false)
         if !result {
@@ -44,7 +51,9 @@ final class VMRecordDataManager {
         }
         return result
     }
-    
+    /**
+     * lock(), unlock(), sync(:) are used to confirm atomic operation of .recordContents and reference file
+     */
     private func lock() {
         if #available(iOS 10.0, *) {
             os_unfair_lock_lock(&VMRecordDataManger_unfairLock)
@@ -82,6 +91,14 @@ final class VMRecordDataManager {
         return output
     }
     
+    /// Create new record
+    ///
+    /// - Parameters:
+    ///   - sourceURL: URL of recorded source audio file
+    ///   - name: Record name
+    ///   - fileExtension: Audio file extension
+    /// - Returns: Created VMRecord or nil
+    /// - Throws: File operation errors or name validating errors
     func createRecord(sourceURL:URL, name:String, fileExtension:String) throws -> VMRecord? {
         if name.characters.count == 0 {
             throw NSError.VMRecordDataManagerInvalidRecordName
@@ -133,7 +150,11 @@ final class VMRecordDataManager {
         
         return record
     }
-    
+
+    /// Delete record reference and audio file
+    ///
+    /// - Parameter record: Record to delete
+    /// - Returns: Deleting succeeded or not
     func removeRecord(record:VMRecord) -> Bool {
         do {
             try sync {
@@ -158,6 +179,7 @@ final class VMRecordDataManager {
         return true
     }
     
+    /// Delete temporary file
     func removeTemporaryFile(at url:URL) {
         sync {
             let fileManager = FileManager.default

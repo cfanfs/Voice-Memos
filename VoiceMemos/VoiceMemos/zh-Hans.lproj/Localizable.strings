@@ -25,5 +25,6 @@
 "glb_delete" = "删除";
 "glb_save" = "保存";
 "glb_err" = "错误";
+"glb_ok" = "好";
 "glb_unknown_err" = "未知错误";
 "glb_confirm_to_delete" = "确定要删除这条录音？";

@@ -47,6 +47,7 @@ class VMRecordingViewController: UIViewController {
 
 // MARK: - Recording Control
 extension VMRecordingViewController {
+    /// Action whlie recording button touched down
     @IBAction func startRecordingAction(sender:VMRecordingButton) {
         resetMessage()
         let permission = VMAudioManager.shared.microphonePermission()
@@ -65,11 +66,12 @@ extension VMRecordingViewController {
             break
         }
     }
-    
+    /// Action whlie recording button touched up
     @IBAction func endRecordingAction(sender:VMRecordingButton) {
         VMAudioManager.shared.stopRecording()
     }
     
+    /// Actually start recording
     private func startRecording() {
         do {
             let url = VMRecordDataManager.shared.temporaryRecordURL
@@ -83,14 +85,16 @@ extension VMRecordingViewController {
             showErrorMessage(message: error.localizedDescription)
         }
     }
-    
+    /// Update UI while recording ended
     fileprivate func endRecording() {
         recordingButton.isRecording = false
         timeLabel.isHidden = true
         endTimer()
         timeLabel.text = nil
     }
-    
+    /**
+     * Timer related functions to display recording progress
+     */
     private func startTimer() {
         if recordTimer == nil {
             recordTimer = Timer.scheduledTimer(
@@ -124,6 +128,7 @@ extension VMRecordingViewController {
         }
     }
     
+    /// Pop up an alert to let user input the record name
     fileprivate func getRecordName() {
         let alertController = UIAlertController(
             title: NSLocalizedString("glb_save_record", comment: ""),
@@ -155,6 +160,9 @@ extension VMRecordingViewController {
         present(alertController, animated: true, completion: nil)
     }
     
+    /// Actually call create record functions
+    ///
+    /// - Parameter sender: Text field containing possible record name
     private func createNewRecord(_ sender:UITextField) {
         if let name = sender.text {
             do {
@@ -204,7 +212,9 @@ extension VMRecordingViewController {
         
         present(alertController, animated: true, completion: nil)
     }
-    
+    /**
+     * Update message label contents
+     */
     fileprivate func resetMessage() {
         messageLabel.text = NSLocalizedString("glb_hold_to_record", comment: "")
         messageLabel.textColor = UIColor.black
@@ -227,13 +237,14 @@ extension VMRecordingViewController {
 
 // MARK: - Notifications
 extension VMRecordingViewController {
+    // VMAudioManagerDidFinishRecording
     func recordingFinished(noti:Notification) {
         OperationQueue.main.addOperation {
             self.getRecordName()
             self.endRecording()
         }
     }
-    
+    // VMAudioManagerRecordingFailed
     func recordingFailed(noti:Notification) {
         OperationQueue.main.addOperation {
             let errorMessage = noti.userInfo.flatMap { $0["error"] as? NSError }.map { $0.localizedDescription }

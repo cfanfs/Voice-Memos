@@ -25,5 +25,6 @@
 "glb_delete" = "Delete";
 "glb_save" = "Save";
 "glb_err" = "Error";
+"glb_ok" = "OK";
 "glb_unknown_err" = "Unknown error occured";
 "glb_confirm_to_delete" = "Are you sure you want to delete the record?";

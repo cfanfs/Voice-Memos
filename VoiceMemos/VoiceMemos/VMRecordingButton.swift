@@ -23,6 +23,8 @@ class VMRecordingButton: UIControl {
             }
         }
     }
+    
+    /// Update progress circle 
     var progress:CGFloat {
         get {
             return progressCircleLayer.strokeEnd
@@ -96,6 +98,9 @@ extension VMRecordingButton {
         return CGSize(width: iconSize.width + 20.0, height: iconSize.height + 20.0)
     }
     
+    /**
+     * Display for different state.
+     */
     fileprivate func displayRecording() {
         recordingIconLayer.contents = #imageLiteral(resourceName: "record_icon_recording").cgImage
         recordBackgroundLayer.fillColor = UIColor.green.cgColor
@@ -108,7 +113,9 @@ extension VMRecordingButton {
         progressCircleLayer.isHidden = true
         progressCircleLayer.strokeEnd = 0.0
     }
-    
+    /**
+     * Old implementations to display counting down. Not used currently.
+     */
     fileprivate func startCountDownAnimation() {
         if recordDurationLimit > 0.0 {
             let animation = CABasicAnimation(keyPath: "strokeEnd")

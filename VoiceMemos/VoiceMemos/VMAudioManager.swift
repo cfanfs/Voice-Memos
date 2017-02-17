@@ -22,6 +22,8 @@ final class VMAudioManager:NSObject {
     private(set) var recordingTargetURL:URL?
     fileprivate var recorder:AVAudioRecorder?
     
+    
+    /// State enum of audio manager
     enum State {
         case playing
         case recording
@@ -40,7 +42,6 @@ final class VMAudioManager:NSObject {
     
     override init() {
         super.init()
-        // If 
         if let configurationMaximumLength = Bundle(for: type(of:self)).object(forInfoDictionaryKey: "VMRecordMaximumLength") as? TimeInterval {
             maximumRecordDuration = configurationMaximumLength
         }
@@ -70,14 +71,17 @@ final class VMAudioManager:NSObject {
             object: nil)
     }
     
+    /// Configurating AVAudioSession.sharedInstance(). Called while initializing, getting microphone access, entering background, being interupted.
     fileprivate func resetAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
-            try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+            updateAudioPort()
         } catch {
             VMUtils.log("Reset Audio Session Failed:\n\(error)")
         }
     }
+    
+    // MARK: - Public Interfaces
     
     // Microphone Access
     
@@ -95,13 +99,6 @@ final class VMAudioManager:NSObject {
     }
     
     // Play / Record Control
-    
-    var currentTimeOfRecorder:TimeInterval {
-        if state == .recording, let currentRecorder = recorder {
-            return currentRecorder.currentTime
-        }
-        return 0
-    }
     
     func play(url:URL) throws -> Bool {
         // prepare audiosession
@@ -129,10 +126,18 @@ final class VMAudioManager:NSObject {
             recorder?.stop()
         }
     }
+    
+    var currentTimeOfRecorder:TimeInterval {
+        if state == .recording, let currentRecorder = recorder {
+            return currentRecorder.currentTime
+        }
+        return 0
+    }
 }
 
 // MARK: - Recording Format Support
 extension VMAudioManager {
+    /// Supported record format
     enum AudioFormat {
         case lossless
         case mpeg4acc
@@ -164,6 +169,9 @@ extension VMAudioManager {
 
 // MARK: - Play/Record Methods Internal
 fileprivate extension VMAudioManager {
+    /// Prepare the audio player and play the record.
+    ///
+    /// - Throws: Errors occured while preparing the audio player.
     func prepareAndPlay() throws {
         guard let url = playingURL else {
             throw NSError.VMAudioManagerEmptyURL
@@ -188,7 +196,11 @@ fileprivate extension VMAudioManager {
             userInfo: nil)
     }
     
-    func prepareAndRecord(format:AudioFormat) throws {
+    /// Prepare the audio recorder for specific format and start recording
+    ///
+    /// - Parameter format: Record format
+    /// - Throws: Errors occured while preparing audio recorder
+    fileprivate func prepareAndRecord(format:AudioFormat) throws {
         guard let url = recordingTargetURL else {
             throw NSError.VMAudioManagerEmptyURL
         }
@@ -276,6 +288,9 @@ extension VMAudioManager:AVAudioRecorderDelegate {
 
 // MARK: - Observing Notifications
 extension VMAudioManager {
+    /**
+     * End current work while interuption occured. Pause after interuption starting, and completely stop while interuption ended.
+     */
     // AVAudioSessionInterruption
     func audioSessionInteruptionEvent(noti:Notification) {
         let interuptionType = (noti.userInfo.flatMap{$0[AVAudioSessionInterruptionTypeKey] as? UInt})
@@ -294,8 +309,12 @@ extension VMAudioManager {
     func audioSessionRouteChanged(noti:Notification) {
         let currentRouteDescription = AVAudioSession.sharedInstance().currentRoute
         VMUtils.log("Route changed to: [inputs:\(currentRouteDescription.inputs.map{$0.portName}), output:\(currentRouteDescription.outputs.map{$0.portName})]")
+        updateAudioPort()
     }
     
+    /**
+     * End current work while not in front. Pause while entering background, and completely stop while returning from background.
+     */
     func applicationWillBecomeInactive(noti:Notification) {
         hangUpCurrentWork()
     }
@@ -323,6 +342,7 @@ extension VMAudioManager {
 }
 
 // MARK: - Post Notifications
+
 extension Notification.Name {
     static let VMAudioManagerDidFinishRecording = Notification.Name("VMAudioManagerDidFinishRecording")
     static let VMAudioManagerRecordingFailed = Notification.Name("VMAudioManagerRecordingFailed")
@@ -370,6 +390,9 @@ extension NSError {
 }
 
 // MARK: - Proximity Sensor Support
+/**
+ * Switch to phone receiver after user get close to the phone
+ */
 extension VMAudioManager {
     fileprivate func startObservingProximitySensor() {
         UIDevice.current.isProximityMonitoringEnabled = true
@@ -382,7 +405,7 @@ extension VMAudioManager {
     
     fileprivate func stopObservingProximitySensor() {
         UIDevice.current.isProximityMonitoringEnabled = false
-        try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        updateAudioPort()
         NotificationCenter.default.removeObserver(
             self,
             name: .UIDeviceProximityStateDidChange,
@@ -390,10 +413,26 @@ extension VMAudioManager {
     }
     
     @objc fileprivate func proximityStateChanged(noti:Notification) {
-        if UIDevice.current.proximityState {
-            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
-        } else {
-            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        updateAudioPort()
+    }
+    
+    fileprivate func updateAudioPort() {
+        guard state != .playing else { return }
+        let currentOutputRouteType = AVAudioSession.sharedInstance().currentRoute.outputs.first?.portType
+        do {
+            if currentOutputRouteType != AVAudioSessionPortBuiltInReceiver && currentOutputRouteType != AVAudioSessionPortBuiltInSpeaker {
+                try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+            } else if UIDevice.current.proximityState {
+                if currentOutputRouteType == AVAudioSessionPortBuiltInSpeaker {
+                    try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+                }
+            } else if !UIDevice.current.proximityState {
+                if currentOutputRouteType == AVAudioSessionPortBuiltInReceiver {
+                    try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+                }
+            }
+        } catch {
+            VMUtils.log("Overriding output audio port failed:\n\(error)")
         }
     }
 }

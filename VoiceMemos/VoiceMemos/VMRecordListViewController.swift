@@ -19,6 +19,7 @@ class VMRecordListViewController: UIViewController {
         records = VMRecordDataManager.shared.records
     }
     
+    /// Show errors occured while playing in an alert
     fileprivate func showError(error:Error) {
         let alertController = UIAlertController(title: nil, message: error.localizedDescription, preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .cancel, handler: nil)
@@ -102,7 +103,7 @@ extension VMRecordListViewController:UITableViewDataSource, UITableViewDelegate 
         present(alertController, animated: true, completion: nil)
     }
 }
-
+// MARK: - VMRecordCell
 class VMRecordCell:UITableViewCell {
     @IBOutlet weak var nameLabel:UILabel!
     @IBOutlet weak var timeLabel:UILabel!
@@ -130,6 +131,7 @@ class VMRecordCell:UITableViewCell {
     }
     private var recordReference:VMRecord?
     
+    /// Self configuraton for VMRecord
     fileprivate func config(withRecord record:VMRecord) {
         recordReference = record
         nameLabel.text = record.name
@@ -144,7 +146,7 @@ class VMRecordCell:UITableViewCell {
         recordReference = nil
         isPlaying = false
     }
-    
+    /// Play/Stop button action
     @IBAction func playStopAction(_ sender:UIButton) {
         if isEditing {
             return
@@ -163,7 +165,7 @@ class VMRecordCell:UITableViewCell {
             }
         }
     }
-    
+    // VMAudioManagerDidStartPlaying / VMAudioManagerDidEndPlaying
     @objc private func playingStatusChanged(noti:Notification) {
         OperationQueue.main.addOperation {
             if let record = self.recordReference {
